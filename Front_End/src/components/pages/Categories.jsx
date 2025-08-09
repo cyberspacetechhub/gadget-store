@@ -14,7 +14,12 @@ const Categories = () => {
   const { data: categoriesResponse, isLoading: categoriesLoading } = useQuery(
     'categories',
     async () => {
-      return await fetch(`${baseUrl}categories`, auth?.accessToken);
+      return await fetch(`${baseUrl}categories`);
+    },
+    {
+      staleTime: 300000,
+      cacheTime: 600000,
+      retry: 3
     }
   );
 
@@ -33,8 +38,7 @@ const Categories = () => {
       for (const category of categories) {
         try {
           const products = await fetch(
-            `${baseUrl}products?category=${category._id}`,
-            auth?.accessToken
+            `${baseUrl}products?category=${category._id}`
           );
           productsByCategory[category._id] = products?.data || [];
         } catch (error) {

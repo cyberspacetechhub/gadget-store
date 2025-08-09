@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { HeartIcon, ShoppingCartIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { useCart } from '../../hooks/useCart';
+import toast from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
   const {
@@ -14,6 +16,20 @@ const ProductCard = ({ product }) => {
     inStock,
     brand
   } = product;
+  
+  const { addToCart } = useCart();
+  
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await addToCart.mutateAsync({ productId: _id, quantity: 1 });
+      toast.success('Added to cart successfully');
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      toast.error(error.message || 'Failed to add to cart');
+    }
+  };
 
   const discountPercentage = originalPrice && price < originalPrice 
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
@@ -112,11 +128,14 @@ const ProductCard = ({ product }) => {
 
         {/* Add to Cart Button */}
         <button
-          disabled={inStock === false || inStock === 0}
+          onClick={handleAddToCart}
+          disabled={inStock === false || inStock === 0 || addToCart.isLoading}
           className="w-full mt-3 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2"
         >
           <ShoppingCartIcon className="w-4 h-4" />
-          <span>{(inStock === false || inStock === 0) ? 'Out of Stock' : 'Add to Cart'}</span>
+          <span>
+            {addToCart.isLoading ? 'Adding...' : (inStock === false || inStock === 0) ? 'Out of Stock' : 'Add to Cart'}
+          </span>
         </button>
       </div>
     </div>

@@ -6,51 +6,50 @@ import { useCart } from '../../hooks/useCart';
 import { useOrders } from '../../hooks/useOrders';
 import useAuth from '../../hooks/useAuth';
 import PaymentModal from '../payment/PaymentModal';
+import { nigerianStates, getDeliveryFee, getAvailablePaymentMethods } from './states';
 import toast from 'react-hot-toast';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState('paystack');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [orderData, setOrderData] = useState(null);
   const { data: cart } = useCart();
   const { createOrder } = useOrders();
 
+  console.log(cart)
   const { register, handleSubmit, formState: { errors }, watch } = useForm();
-  const watchedState = watch('state');
+  const selectedState = watch('state');
 
   const cartItems = cart?.items || [];
-  const total = cartItems.reduce((sum, item) => {
+  const subtotal = cartItems.reduce((sum, item) => {
     const price = item.price || item.product?.price || 0;
     const quantity = item.quantity || 0;
     return sum + (price * quantity);
   }, 0);
+  
+  const deliveryFee = getDeliveryFee(selectedState);
+  const total = subtotal + deliveryFee;
+  const availablePaymentMethods = getAvailablePaymentMethods(selectedState);
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!auth?.accessToken) {
       navigate('/login?redirect=/checkout');
     }
   }, [auth?.accessToken, navigate]);
 
-  // Handle empty cart navigation
   useEffect(() => {
     if (auth?.accessToken && cartItems.length === 0 && cart) {
       navigate('/cart');
     }
   }, [cartItems.length, cart, auth?.accessToken, navigate]);
 
-  const isEbonyiState = watchedState?.toLowerCase() === 'ebonyi';
-  const availablePaymentMethods = isEbonyiState 
-    ? ['paystack', 'bank_transfer', 'cash_on_delivery'] 
-    : ['paystack', 'bank_transfer'];
-
   useEffect(() => {
-    if (!isEbonyiState && paymentMethod === 'cash_on_delivery') {
-      setPaymentMethod('paystack');
+    if (!availablePaymentMethods.includes(paymentMethod)) {
+      setPaymentMethod(availablePaymentMethods[0] || 'card');
     }
-  }, [isEbonyiState, paymentMethod]);
+  }, [availablePaymentMethods, paymentMethod]);
 
   const onSubmit = async (data) => {
     const orderPayload = {
@@ -95,11 +94,10 @@ const Checkout = () => {
     navigate('/dashboard/order-success');
   };
 
-  // Show loading states
   if (!auth?.accessToken) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <div className="w-12 h-12 border-b-2 border-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+      <div className="container px-4 py-8 mx-auto text-center">
+        <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-blue-600 rounded-full animate-spin"></div>
         <p>Redirecting to login...</p>
       </div>
     );
@@ -107,145 +105,115 @@ const Checkout = () => {
 
   if (!cart) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <div className="w-12 h-12 border-b-2 border-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+      <div className="container px-4 py-8 mx-auto text-center">
+        <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-blue-600 rounded-full animate-spin"></div>
         <p>Loading cart...</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+    <div className="container px-4 py-8 mx-auto">
+      <h1 className="mb-8 text-3xl font-bold text-gray-900">Checkout</h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Checkout Form */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Shipping Address */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-2 mb-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="space-y-8 lg:col-span-2">
+          <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="flex items-center mb-6 space-x-2">
               <MapPinIcon className="w-6 h-6 text-blue-600" />
               <h2 className="text-xl font-bold text-gray-900">Shipping Address</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name *
-                </label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">First Name *</label>
                 <input
                   {...register('firstName', { required: 'First name is required' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your first name"
                 />
-                {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
-                )}
+                {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name *
-                </label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Last Name *</label>
                 <input
                   {...register('lastName', { required: 'Last name is required' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your last name"
                 />
-                {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
-                )}
+                {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Email *</label>
                 <input
                   {...register('email', { required: 'Email is required' })}
                   type="email"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your email"
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
+                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone *
-                </label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Phone *</label>
                 <input
                   {...register('phone', { required: 'Phone is required' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your phone number"
                 />
-                {errors.phone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                )}
+                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Street Address *
-                </label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Street Address *</label>
                 <input
                   {...register('street', { required: 'Street address is required' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your street address"
                 />
-                {errors.street && (
-                  <p className="mt-1 text-sm text-red-600">{errors.street.message}</p>
-                )}
+                {errors.street && <p className="mt-1 text-sm text-red-600">{errors.street.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  City *
-                </label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">City *</label>
                 <input
                   {...register('city', { required: 'City is required' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter city"
                 />
-                {errors.city && (
-                  <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
-                )}
+                {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  State *
-                </label>
-                <input
+                <label className="block mb-2 text-sm font-medium text-gray-700">State *</label>
+                <select
                   {...register('state', { required: 'State is required' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter state"
-                />
-                {errors.state && (
-                  <p className="mt-1 text-sm text-red-600">{errors.state.message}</p>
-                )}
+                >
+                  <option value="">Select State</option>
+                  {nigerianStates.map((state) => (
+                    <option key={state.value} value={state.value}>
+                      {state.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.state && <p className="mt-1 text-sm text-red-600">{errors.state.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ZIP Code *
-                </label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">ZIP Code *</label>
                 <input
                   {...register('zipCode', { required: 'ZIP code is required' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter ZIP code"
                 />
-                {errors.zipCode && (
-                  <p className="mt-1 text-sm text-red-600">{errors.zipCode.message}</p>
-                )}
+                {errors.zipCode && <p className="mt-1 text-sm text-red-600">{errors.zipCode.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country
-                </label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Country</label>
                 <input
                   {...register('country')}
                   defaultValue="Nigeria"
@@ -255,42 +223,41 @@ const Checkout = () => {
             </div>
           </div>
 
-          {/* Payment Method */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-2 mb-6">
+          <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="flex items-center mb-6 space-x-2">
               <CreditCardIcon className="w-6 h-6 text-blue-600" />
               <h2 className="text-xl font-bold text-gray-900">Payment Method</h2>
             </div>
 
             <div className="space-y-4">
-              {availablePaymentMethods.includes('paystack') && (
+              {availablePaymentMethods.includes('card') && (
                 <label className="flex items-center space-x-3 cursor-pointer">
                   <input
                     type="radio"
-                    value="paystack"
-                    checked={paymentMethod === 'paystack'}
+                    value="card"
+                    checked={paymentMethod === 'card'}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     className="w-4 h-4 text-blue-600"
                   />
                   <div className="flex items-center space-x-2">
                     <CreditCardIcon className="w-5 h-5 text-gray-400" />
-                    <span className="font-medium">Pay with Card (Paystack)</span>
+                    <span className="font-medium">Pay with Card</span>
                   </div>
                 </label>
               )}
 
-              {availablePaymentMethods.includes('bank_transfer') && (
+              {availablePaymentMethods.includes('transfer') && (
                 <label className="flex items-center space-x-3 cursor-pointer">
                   <input
                     type="radio"
-                    value="bank_transfer"
-                    checked={paymentMethod === 'bank_transfer'}
+                    value="transfer"
+                    checked={paymentMethod === 'transfer'}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     className="w-4 h-4 text-blue-600"
                   />
                   <div className="flex items-center space-x-2">
                     <TruckIcon className="w-5 h-5 text-gray-400" />
-                    <span className="font-medium">Bank Transfer (Paystack)</span>
+                    <span className="font-medium">Bank Transfer</span>
                   </div>
                 </label>
               )}
@@ -312,52 +279,51 @@ const Checkout = () => {
               )}
             </div>
             
-            {!isEbonyiState && (
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+            {selectedState && !availablePaymentMethods.includes('cash_on_delivery') && (
+              <div className="p-3 mt-4 border border-yellow-200 rounded-md bg-yellow-50">
                 <p className="text-sm text-yellow-800">
-                  Cash on Delivery is only available for addresses within Ebonyi State.
+                  Cash on Delivery is only available in Ebonyi state.
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
+          <div className="sticky p-6 bg-white border border-gray-200 rounded-lg shadow-sm top-4">
+            <h2 className="mb-4 text-xl font-bold text-gray-900">Order Summary</h2>
 
-            <div className="space-y-4 mb-6">
+            <div className="mb-6 space-y-4">
               {cartItems.map((item, index) => (
                 <div key={item.product?._id || item.productId || index} className="flex items-center space-x-3">
                   <img
-                    src={item.image || item.product?.images?.[0] || '/placeholder.jpg'}
+                    src={item.product?.coverImage || item.product?.images?.[0] || '/placeholder.jpg'}
                     alt={item.name || item.product?.name}
-                    className="w-12 h-12 object-cover rounded-lg"
+                    className="object-cover w-12 h-12 rounded-lg"
                   />
                   <div className="flex-1">
-                    <p className="font-medium text-sm">{item.name || item.product?.name}</p>
-                    <p className="text-gray-600 text-sm">Qty: {item.quantity}</p>
+                    <p className="text-sm font-medium">{item.name || item.product?.name}</p>
+                    <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                   </div>
                   <p className="font-medium">₦{((item.price || item.product?.price || 0) * item.quantity).toLocaleString()}</p>
                 </div>
               ))}
             </div>
 
-            <div className="space-y-3 mb-6 pt-4 border-t border-gray-200">
+            <div className="pt-4 mb-6 space-y-3 border-t border-gray-200">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">₦{total.toLocaleString()}</span>
+                <span className="font-medium">₦{subtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Shipping</span>
-                <span className="font-medium">Free</span>
+                <span className="text-gray-600">Delivery Fee</span>
+                <span className="font-medium">₦{deliveryFee.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax</span>
                 <span className="font-medium">₦0</span>
               </div>
-              <div className="border-t border-gray-200 pt-3">
+              <div className="pt-3 border-t border-gray-200">
                 <div className="flex justify-between">
                   <span className="text-lg font-bold text-gray-900">Total</span>
                   <span className="text-lg font-bold text-gray-900">₦{total.toLocaleString()}</span>
@@ -368,7 +334,7 @@ const Checkout = () => {
             <button
               type="submit"
               disabled={createOrder.isLoading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="w-full px-4 py-3 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
               {createOrder.isLoading ? 'Creating Order...' : 'Continue to Payment'}
             </button>

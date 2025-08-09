@@ -81,7 +81,7 @@ class CartService {
         await cart.save();
         await cart.populate({
             path: 'items.product',
-            select: 'name images price stock.quantity status brand'
+            select: 'name images coverImage price stock.quantity status brand'
         });
 
         return cart;
@@ -117,7 +117,7 @@ class CartService {
         await cart.save();
         await cart.populate({
             path: 'items.product',
-            select: 'name images price stock.quantity status brand'
+            select: 'name images coverImage price stock.quantity status brand'
         });
 
         return cart;
@@ -136,7 +136,7 @@ class CartService {
         await cart.save();
         await cart.populate({
             path: 'items.product',
-            select: 'name images price stock.quantity status brand'
+            select: 'name images coverImage price stock.quantity status brand'
         });
 
         return cart;
@@ -198,7 +198,7 @@ class CartService {
 
         await cart.populate({
             path: 'items.product',
-            select: 'name images price stock.quantity status brand'
+            select: 'name images coverImage price stock.quantity status brand'
         });
 
         return { cart, updated };
@@ -296,7 +296,7 @@ class CartService {
         await userCart.save();
         await userCart.populate({
             path: 'items.product',
-            select: 'name images price stock.quantity status brand'
+            select: 'name images coverImage price stock.quantity status brand'
         });
 
         return userCart;

@@ -14,15 +14,22 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   
   const { data: product, isLoading, error } = useProduct(id);
+  console.log(product)
   const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, data: wishlistData } = useWishlist();
+  
+  const isInWishlist = (productId) => {
+    return wishlistData?.items?.some(item => item.product?._id === productId || item.productId === productId);
+  };
 
   const handleAddToCart = async () => {
     try {
-      await addToCart.mutate({ productId: id, quantity });
+      console.log('Attempting to add to cart:', { productId: id, quantity });
+      await addToCart.mutateAsync({ productId: id, quantity });
       toast.success('Added to cart successfully');
     } catch (error) {
-      toast.error('Failed to add to cart');
+      console.error('Add to cart error:', error);
+      toast.error(error.message || 'Failed to add to cart');
     }
   };
 
@@ -71,7 +78,7 @@ const ProductDetails = () => {
   }
 
   const images = product.images || [];
-  const inStock = product.stock?.quantity > 0;
+  const inStock = (product.stock?.quantity || product.quantity || 0) > 0;
 
   return (
     <div className="container px-4 py-8 mx-auto">
@@ -155,7 +162,7 @@ const ProductDetails = () => {
           <div className="flex items-center space-x-2">
             <div className={`w-3 h-3 rounded-full ${inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
             <span className={`font-medium ${inStock ? 'text-green-600' : 'text-red-600'}`}>
-              {inStock ? `In Stock (${product.stock.quantity} available)` : 'Out of Stock'}
+              {inStock ? `In Stock (${product.stock?.quantity || product.quantity || 0} available)` : 'Out of Stock'}
             </span>
           </div>
 
@@ -194,7 +201,7 @@ const ProductDetails = () => {
                   </button>
                   <span className="px-4 py-2 border-gray-300 border-x">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(Math.min(product.stock.quantity, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(product.stock?.quantity || product.quantity || 1, quantity + 1))}
                     className="px-3 py-2 hover:bg-gray-100"
                   >
                     +

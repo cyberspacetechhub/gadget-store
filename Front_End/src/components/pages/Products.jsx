@@ -2,14 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   MagnifyingGlassIcon,
-  FunnelIcon,
-  HeartIcon,
-  ShoppingCartIcon
+  FunnelIcon
 } from '@heroicons/react/24/outline';
 import { useProducts } from '../../hooks/useProducts';
-import { useCart } from '../../hooks/useCart';
-import { useAddToWishlist } from '../../hooks/useWishlist';
+import { useCategories } from '../../hooks/useCategories';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import ProductCard from '../common/ProductCard';
 
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,22 +26,14 @@ const Products = () => {
   };
 
   const { data, isLoading, error } = useProducts(params);
-  const { addToCart } = useCart();
-  const addToWishlist = useAddToWishlist();
+  const { data: categoriesData } = useCategories();
+  
+  const categories = categoriesData?.categories || [];
 
   const products = data?.products || [];
   const totalPages = data?.total ? Math.ceil(data.total / 12) : 1;
 
-  const handleAddToCart = (product) => {
-    addToCart.mutate({
-      productId: product._id,
-      quantity: 1
-    });
-  };
 
-  const handleAddToWishlist = (productId) => {
-    addToWishlist.mutate(productId);
-  };
 
   if (error) {
     return (
@@ -94,10 +84,11 @@ const Products = () => {
             className="px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
             <option value="">All Categories</option>
-            <option value="smartphones">Smartphones</option>
-            <option value="laptops">Laptops</option>
-            <option value="tablets">Tablets</option>
-            <option value="accessories">Accessories</option>
+            {categories.map((category) => (
+              <option key={category._id} value={category._id}>
+                {category.name}
+              </option>
+            ))}
           </select>
           <select
             value={priceRange}
@@ -126,52 +117,7 @@ const Products = () => {
         <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => (
-              <div key={product._id} className="overflow-hidden transition-shadow bg-white rounded-lg shadow-md dark:bg-gray-800 hover:shadow-lg">
-                <Link to={`/products/${product._id}`}>
-                  <img
-                    src={product.images?.[0] || '/placeholder.jpg'}
-                    alt={product.name}
-                    className="object-cover w-full h-48"
-                  />
-                </Link>
-                <div className="p-4">
-                  <Link to={`/products/${product._id}`}>
-                    <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white hover:text-indigo-600">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
-                    {product.brand}
-                  </p>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-indigo-600">
-                      ₦{product.price?.toLocaleString()}
-                    </span>
-                    {product.originalPrice && product.originalPrice > product.price && (
-                      <span className="text-sm text-gray-500 line-through">
-                        ₦{product.originalPrice?.toLocaleString()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      disabled={addToCart.isLoading}
-                      className="flex items-center px-3 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                    >
-                      <ShoppingCartIcon className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </button>
-                    <button
-                      onClick={() => handleAddToWishlist(product._id)}
-                      disabled={addToWishlist.isLoading}
-                      className="p-2 text-gray-400 hover:text-red-500 disabled:opacity-50"
-                    >
-                      <HeartIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
 

@@ -60,29 +60,18 @@ app.use(credentials);
 app.use(cors(corsOptions));
 
 // Additional CORS headers as fallback
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    const allowedOrigins = [
-        'http://localhost:5173',
-        'http://localhost:3000', 
-        'http://127.0.0.1:5173',
-        'https://gadget-store-sigma.vercel.app'
-    ];
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header('Access-Control-Allow-Credentials', 'true');
+//     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+//     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
     
-    if (allowedOrigins.includes(origin)) {
-        res.header('Access-Control-Allow-Origin', origin);
-    }
-    
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-    
-    if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
-    } else {
-        next();
-    }
-});
+//     if (req.method === 'OPTIONS') {
+//         res.sendStatus(200);
+//     } else {
+//         next();
+//     }
+// });
 
 // Built-in middleware for handling urlencoded form data
 app.use(express.urlencoded({ extended: false }));

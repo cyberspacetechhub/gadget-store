@@ -45,15 +45,15 @@ export const useProduct = (id, options = {}) => {
     ['product', id],
     async () => {
       try {
-        const result = await fetch(`${baseUrl}products/${id}`, auth.accessToken);
-        return result.data?.data || {};
+        const result = await fetch(`${baseUrl}products/${id}`);
+        return result.data?.data || result.data || {};
       } catch (error) {
         console.error('Error fetching product:', error);
         throw error;
       }
     },
     {
-      enabled: !!id && !!auth.accessToken,
+      enabled: !!id,
       staleTime: 300000,
       ...options
     }

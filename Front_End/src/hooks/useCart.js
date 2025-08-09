@@ -37,14 +37,20 @@ export const useCart = () => {
     async ({ productId, quantity = 1 }) => {
       const token = auth?.accessToken || localStorage.getItem('accessToken');
       if (!token) {
-        throw new Error('Authentication required');
+        throw new Error('Please login to add items to cart');
       }
+      console.log('Adding to cart:', { productId, quantity, token: !!token });
       const result = await post(`${baseUrl}cart/add`, { productId, quantity }, token);
+      console.log('Add to cart result:', result);
       return result;
     },
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        console.log('Cart add success:', data);
         queryClient.invalidateQueries(['cart']);
+      },
+      onError: (error) => {
+        console.error('Cart add error:', error);
       }
     }
   );
