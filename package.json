@@ -1,0 +1,41 @@
+{
+  "name": "gadget-ecommerce-platform",
+  "version": "1.0.0",
+  "description": "A world-class, full-featured gadget e-commerce platform with modern UI/UX and smart comparison tools",
+  "main": "index.js",
+  "scripts": {
+    "setup": "setup.bat",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd BackEnd && npm run dev",
+    "dev:frontend": "cd Front_End && npm run dev",
+    "build": "cd Front_End && npm run build",
+    "start": "cd BackEnd && npm start",
+    "test": "concurrently \"npm run test:backend\" \"npm run test:frontend\"",
+    "test:backend": "cd BackEnd && npm test",
+    "test:frontend": "cd Front_End && npm test"
+  },
+  "keywords": [
+    "ecommerce",
+    "gadgets",
+    "electronics",
+    "react",
+    "nodejs",
+    "mongodb",
+    "tailwindcss",
+    "paystack",
+    "stripe"
+  ],
+  "author": "Shedrach",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/gadget-ecommerce.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/gadget-ecommerce/issues"
+  },
+  "homepage": "https://github.com/yourusername/gadget-ecommerce#readme"
+}
