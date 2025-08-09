@@ -45,35 +45,32 @@ console.log(data)
 
   if (isLoading) {
     return (
-      <div className="container px-4 py-8 mx-auto">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-gray-200 rounded-lg animate-pulse h-80"></div>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="bg-gray-200 rounded-lg animate-pulse h-80"></div>
+        ))}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container px-4 py-8 mx-auto text-center">
-        <p className="text-red-600">Error loading iPhone products</p>
+      <div className="text-center">
+        <p className="text-white">Error loading iPhone products</p>
       </div>
     );
   }
 
   return (
-    <div className="container px-4 py-8 mx-auto">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900">iPhone Products</h1>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
           <ProductCard key={product._id} product={product} />
         ))}
       </div>
       {products.length === 0 && (
         <div className="py-12 text-center">
-          <p className="text-gray-500">No iPhone products found</p>
+          <p className="text-white">No iPhone products found</p>
         </div>
       )}
     </div>

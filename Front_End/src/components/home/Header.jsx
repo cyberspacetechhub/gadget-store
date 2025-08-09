@@ -160,9 +160,9 @@ const Header = () => {
                 </Link>
               </div>
 
-              {/* User Menu */}
+              {/* User Menu - Desktop only */}
               {isAuthenticated ? (
-                <div className="relative" ref={userMenuRef}>
+                <div className="relative hidden sm:block" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className="flex items-center p-2 space-x-2 text-gray-600 transition-colors hover:text-blue-600 dark:text-gray-300"
@@ -172,7 +172,7 @@ const Header = () => {
                         {user?.firstName?.charAt(0) || user?.username?.charAt(0)}
                       </span>
                     </div>
-                    <ChevronDownIcon className="hidden w-4 h-4 sm:block" />
+                    <ChevronDownIcon className="w-4 h-4" />
                   </button>
 
                   <AnimatePresence>
@@ -275,7 +275,58 @@ const Header = () => {
                       {item.name}
                     </Link>
                   ))}
-                  {!isAuthenticated && (
+                  {isAuthenticated ? (
+                    <>
+                      <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center space-x-3 py-2">
+                          <div className="flex items-center justify-center w-8 h-8 bg-blue-600 rounded-full">
+                            <span className="text-sm font-medium text-white">
+                              {user?.firstName?.charAt(0) || user?.username?.charAt(0)}
+                            </span>
+                          </div>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {user?.firstName || user?.username}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const role = user?.roles;
+                          if (role === "Admin") {
+                            navigate('/admin/dashboard');
+                          } else if (role === "Vendor") {
+                            navigate('/vendor/dashboard');
+                          } else {
+                            navigate('/dashboard');
+                          }
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="block w-full px-4 py-2 text-left font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300"
+                      >
+                        Dashboard
+                      </button>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="block px-4 py-2 font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Orders
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full px-4 py-2 text-left font-medium text-red-600 hover:text-red-700"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
                     <>
                       <Link
                         to="/login"
