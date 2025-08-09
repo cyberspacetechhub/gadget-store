@@ -72,29 +72,30 @@ const Orders = () => {
   }
 
   return (
-    <div className="container px-4 py-8 mx-auto">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900">My Orders</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container px-4 py-8 mx-auto">
+        <h1 className="mb-8 text-3xl font-bold text-gray-900 dark:text-white">My Orders</h1>
 
-      <div className="space-y-6">
-        {orders.map((order) => (
-          <div key={order._id} className="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm">
-            {/* Order Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="space-y-6">
+          {orders.map((order) => (
+            <div key={order._id} className="overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+              {/* Order Header */}
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
                   <div>
-                    <p className="text-sm text-gray-600">Order ID</p>
-                    <p className="font-medium">{order._id}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Order ID</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{order._id}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Date</p>
-                    <p className="font-medium">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Date</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Total</p>
-                    <p className="font-medium">₦{order.totalAmount?.toLocaleString()}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
+                    <p className="font-medium text-gray-900 dark:text-white">₦{order.totalAmount?.toLocaleString()}</p>
                   </div>
                 </div>
                 
@@ -126,43 +127,44 @@ const Orders = () => {
               </div>
             </div>
 
-            {/* Order Items */}
-            <div className="p-6">
-              <div className="space-y-4">
-                {order.items?.slice(0, 3).map((item, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <img
-                      src={item.product?.images?.[0]?.url || item.product?.images?.[0] || '/placeholder.jpg'}
-                      alt={item.product?.name}
-                      className="object-cover w-16 h-16 rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{item.product?.name}</h3>
-                      <p className="text-gray-600">Quantity: {item.quantity}</p>
+              {/* Order Items */}
+              <div className="p-6">
+                <div className="space-y-4">
+                  {order.items?.slice(0, 3).map((item, index) => (
+                    <div key={index} className="flex items-center space-x-4">
+                      <img
+                        src={item.product?.images?.[0]?.url || item.product?.images?.[0] || '/placeholder.jpg'}
+                        alt={item.product?.name}
+                        className="object-cover w-16 h-16 rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900 dark:text-white">{item.product?.name}</h3>
+                        <p className="text-gray-600 dark:text-gray-400">Quantity: {item.quantity}</p>
+                      </div>
+                      <p className="font-medium text-gray-900 dark:text-white">₦{item.price?.toLocaleString()}</p>
                     </div>
-                    <p className="font-medium">₦{item.price?.toLocaleString()}</p>
+                  ))}
+                  
+                  {order.items?.length > 3 && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      +{order.items.length - 3} more items
+                    </p>
+                  )}
+                </div>
+
+                {/* Shipping Address */}
+                {order.shippingAddress && (
+                  <div className="pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h4 className="mb-2 font-medium text-gray-900 dark:text-white">Shipping Address</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
+                    </p>
                   </div>
-                ))}
-                
-                {order.items?.length > 3 && (
-                  <p className="text-sm text-gray-600">
-                    +{order.items.length - 3} more items
-                  </p>
                 )}
               </div>
-
-              {/* Shipping Address */}
-              {order.shippingAddress && (
-                <div className="pt-6 mt-6 border-t border-gray-200">
-                  <h4 className="mb-2 font-medium text-gray-900">Shipping Address</h4>
-                  <p className="text-sm text-gray-600">
-                    {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
-                  </p>
-                </div>
-              )}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
