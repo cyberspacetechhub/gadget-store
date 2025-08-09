@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import useAuth from '../../hooks/useAuth';
 
-const CustomerSidebar = () => {
+const CustomerSidebar = ({ isOpen, closeSidebar }) => {
   const location = useLocation();
   const { logout } = useAuth();
 
@@ -32,8 +32,20 @@ const CustomerSidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen">
-      <nav className="p-4 space-y-2">
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden" 
+          onClick={closeSidebar}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <nav className="h-full p-4 space-y-2 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = location.pathname === item.href || 
             (item.name === 'Orders' && location.pathname.startsWith('/dashboard/orders')) ||
@@ -58,13 +70,14 @@ const CustomerSidebar = () => {
         
         <button
           onClick={handleLogout}
-          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          className="flex items-center w-full px-4 py-3 space-x-3 text-gray-600 transition-colors rounded-lg hover:bg-gray-50 hover:text-gray-900"
         >
           <ArrowRightOnRectangleIcon className="w-5 h-5" />
           <span className="font-medium">Logout</span>
         </button>
       </nav>
     </div>
+    </>
   );
 };
 

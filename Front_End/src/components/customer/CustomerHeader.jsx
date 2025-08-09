@@ -1,17 +1,25 @@
 import { Link } from 'react-router-dom';
-import { BellIcon, UserIcon } from '@heroicons/react/24/outline';
+import { BellIcon, UserIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import useAuth from '../../hooks/useAuth';
 
-const CustomerHeader = () => {
+const CustomerHeader = ({ toggleSidebar }) => {
   const { auth } = useAuth();
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Account</h1>
-            <p className="text-gray-600">Welcome back, {auth.user?.firstName || auth.user?.username}</p>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 text-gray-400 hover:text-gray-600 lg:hidden"
+            >
+              <Bars3Icon className="w-6 h-6" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">My Account</h1>
+              <p className="text-gray-600">Welcome back, {auth.user?.firstName || auth.user?.username}</p>
+            </div>
           </div>
           
           <div className="flex items-center space-x-4">
